@@ -5,6 +5,7 @@ var ctx;
 $(document).ready(function() {
 	canvas = document.getElementById('blockGenerator');
 	ctx = canvas.getContext('2d');
+	updateBlock();
 	setInterval(updateBlock, 1000);
 	
 	$.getJSON("https://api.github.com/repos/kvnneff/bloxparty/releases").done(function (json) {
