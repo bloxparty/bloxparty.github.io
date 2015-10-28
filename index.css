@@ -17,6 +17,7 @@ p {
 
 a {
 	text-decoration: none;
+	outline: none;
 }
 
 a#download {
