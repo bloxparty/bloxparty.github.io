@@ -1,4 +1,4 @@
-body {
+html, body {
 	height: 100%;
 	overflow: hidden;
 	background: linear-gradient(rgb(23,28,60), rgb(1,5,20));
