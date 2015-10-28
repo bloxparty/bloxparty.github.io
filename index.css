@@ -52,3 +52,8 @@ a#other:link {
 canvas {
 	margin-bottom: 10px;
 }
+
+a.fa {
+	margin: 30px;
+	color: aliceblue;
+}
