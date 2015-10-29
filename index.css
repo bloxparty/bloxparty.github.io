@@ -23,6 +23,10 @@ a {
 	outline: none;
 }
 
+a:visited {
+	color: aliceblue;
+}
+
 a#download {
 	display: block;
 	width: 200px;
