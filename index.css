@@ -65,3 +65,9 @@ a.fa {
 	margin: 30px;
 	color: aliceblue;
 }
+
+div.btmBar {
+	position: fixed;
+	right: 0;
+	bottom: 0;
+}
