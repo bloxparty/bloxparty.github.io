@@ -27,34 +27,10 @@ a:visited {
 	color: aliceblue;
 }
 
-a.button {
-	display: block;
-	width: 200px;
-	margin: auto;
-	height: 40px;
-	line-height: 40px;
-	background-color: rgb(0, 32, 90);
-	color: aliceblue;
-	border: 0;
-	box-shadow: rgba(255, 255, 255, 0.15) 0 1px 0px 0px inset,
-				rgba(255, 255, 255, 0.05) 0 1px 0px 1px inset,
-				rgba(0, 0, 0, 0.7) 0 1px 2px 0px,
-				rgba(9, 9, 9, 0.6) 0 1px 2px 0px;
-}
-
 a#other {
 	display: block;
 	margin-top: 10px;
 	color: gray;
-}
-
-.button:focus,
-.button:hover {
-	outline: 0;
-	color: rgb(255, 187, 0);
-	box-shadow: rgba(255, 255, 255, 0.05) 0 1px 0px 0px inset,
-				rgba(255, 255, 255, 0.02) 0 1px 0px 1px inset,
-				rgba(9, 9, 9, 0.5) 0 1px 2px 1px;
 }
 
 canvas {
