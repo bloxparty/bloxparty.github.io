@@ -1,0 +1,29 @@
+{
+  "name": "bloxparty.github.io",
+  "version": "1.0.0",
+  "description": "A multiplayer Tetris game built with [Electron](http://electron.atom.io/).",
+  "scripts": {
+    "build": ""
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/bloxparty/bloxparty.github.io.git"
+  },
+  "author": "bloxparty",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/bloxparty/bloxparty.github.io/issues"
+  },
+  "homepage": "https://github.com/bloxparty/bloxparty.github.io#readme",
+  "devDependencies": {
+    "browserify": "^12.0.1",
+    "gulp": "^3.9.0",
+    "gulp-sourcemaps": "^1.6.0",
+    "gulp-util": "^3.0.7",
+    "vinyl-source-stream": "^1.1.0",
+    "watchify": "^3.6.0"
+  },
+  "dependencies": {
+    "color": "^0.10.1"
+  }
+}

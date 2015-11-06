@@ -41,7 +41,6 @@ function drawBlock(block) {
 			if(rotation[i][j] === 1) {
 				ctx.fillStyle = block.color;
 				
-//				ctx.fillRect(i * 20, j * 20, 19, 19);
 				var cellX = i * 20;
 				var cellY = j * 20;
 				var bevelWidth = cellWidth * 0.1
@@ -1063,8 +1062,8 @@ function getRgba(string) {
    }
    var abbr =  /^#([a-fA-F0-9]{3})$/,
        hex =  /^#([a-fA-F0-9]{6})$/,
-       rgba = /^rgba?\(\s*(\d+)\s*,\s*(\d+)\s*,\s*(\d+)\s*(?:,\s*([\d\.]+)\s*)?\)$/,
-       per = /^rgba?\(\s*([\d\.]+)\%\s*,\s*([\d\.]+)\%\s*,\s*([\d\.]+)\%\s*(?:,\s*([\d\.]+)\s*)?\)$/,
+       rgba = /^rgba?\(\s*([+-]?\d+)\s*,\s*([+-]?\d+)\s*,\s*([+-]?\d+)\s*(?:,\s*([+-]?[\d\.]+)\s*)?\)$/,
+       per = /^rgba?\(\s*([+-]?[\d\.]+)\%\s*,\s*([+-]?[\d\.]+)\%\s*,\s*([+-]?[\d\.]+)\%\s*(?:,\s*([+-]?[\d\.]+)\s*)?\)$/,
        keyword = /(\D+)/;
 
    var rgb = [0, 0, 0],
@@ -1121,13 +1120,14 @@ function getHsla(string) {
    if (!string) {
       return;
    }
-   var hsl = /^hsla?\(\s*(\d+)(?:deg)?\s*,\s*([\d\.]+)%\s*,\s*([\d\.]+)%\s*(?:,\s*([\d\.]+)\s*)?\)/;
+   var hsl = /^hsla?\(\s*([+-]?\d+)(?:deg)?\s*,\s*([+-]?[\d\.]+)%\s*,\s*([+-]?[\d\.]+)%\s*(?:,\s*([+-]?[\d\.]+)\s*)?\)/;
    var match = string.match(hsl);
    if (match) {
+      var alpha = parseFloat(match[4]);
       var h = scale(parseInt(match[1]), 0, 360),
           s = scale(parseFloat(match[2]), 0, 100),
           l = scale(parseFloat(match[3]), 0, 100),
-          a = scale(parseFloat(match[4]) || 1, 0, 1);
+          a = scale(isNaN(alpha) ? 1 : alpha, 0, 1);
       return [h, s, l, a];
    }
 }
@@ -1136,13 +1136,14 @@ function getHwb(string) {
    if (!string) {
       return;
    }
-   var hwb = /^hwb\(\s*(\d+)(?:deg)?\s*,\s*([\d\.]+)%\s*,\s*([\d\.]+)%\s*(?:,\s*([\d\.]+)\s*)?\)/;
+   var hwb = /^hwb\(\s*([+-]?\d+)(?:deg)?\s*,\s*([+-]?[\d\.]+)%\s*,\s*([+-]?[\d\.]+)%\s*(?:,\s*([+-]?[\d\.]+)\s*)?\)/;
    var match = string.match(hwb);
    if (match) {
+    var alpha = parseFloat(match[4]);
       var h = scale(parseInt(match[1]), 0, 360),
           w = scale(parseFloat(match[2]), 0, 100),
           b = scale(parseFloat(match[3]), 0, 100),
-          a = scale(parseFloat(match[4]) || 1, 0, 1);
+          a = scale(isNaN(alpha) ? 1 : alpha, 0, 1);
       return [h, w, b, a];
    }
 }
@@ -1254,14 +1255,15 @@ var reverseNames = {};
 for (var name in colorNames) {
    reverseNames[colorNames[name]] = name;
 }
+
 },{"color-name":4}],6:[function(require,module,exports){
 /* MIT license */
 var convert = require("color-convert"),
     string = require("color-string");
 
-var Color = function(cssString) {
-  if (cssString instanceof Color) return cssString;
-  if (! (this instanceof Color)) return new Color(cssString);
+var Color = function(obj) {
+  if (obj instanceof Color) return obj;
+  if (! (this instanceof Color)) return new Color(obj);
 
    this.values = {
       rgb: [0, 0, 0],
@@ -1273,23 +1275,23 @@ var Color = function(cssString) {
    }
 
    // parse Color() argument
-   if (typeof cssString == "string") {
-      var vals = string.getRgba(cssString);
+   if (typeof obj == "string") {
+      var vals = string.getRgba(obj);
       if (vals) {
          this.setValues("rgb", vals);
       }
-      else if(vals = string.getHsla(cssString)) {
+      else if(vals = string.getHsla(obj)) {
          this.setValues("hsl", vals);
       }
-      else if(vals = string.getHwb(cssString)) {
+      else if(vals = string.getHwb(obj)) {
          this.setValues("hwb", vals);
       }
       else {
-        throw new Error("Unable to parse color from string \"" + cssString + "\"");
+        throw new Error("Unable to parse color from string \"" + obj + "\"");
       }
    }
-   else if (typeof cssString == "object") {
-      var vals = cssString;
+   else if (typeof obj == "object") {
+      var vals = obj;
       if(vals["r"] !== undefined || vals["red"] !== undefined) {
          this.setValues("rgb", vals)
       }
@@ -1306,7 +1308,7 @@ var Color = function(cssString) {
          this.setValues("cmyk", vals)
       }
       else {
-        throw new Error("Unable to parse color from object " + JSON.stringify(cssString));
+        throw new Error("Unable to parse color from object " + JSON.stringify(obj));
       }
    }
 }
@@ -1469,7 +1471,7 @@ Color.prototype = {
       // YIQ equation from http://24ways.org/2010/calculating-color-contrast
       var rgb = this.values.rgb,
           yiq = (rgb[0] * 299 + rgb[1] * 587 + rgb[2] * 114) / 1000;
-   	return yiq < 128;
+      return yiq < 128;
    },
 
    light: function() {
@@ -1548,29 +1550,28 @@ Color.prototype = {
       return this;
    },
 
-   mix: function(color2, weight) {
-      weight = 1 - (weight == null ? 0.5 : weight);
+   /**
+    * Ported from sass implementation in C
+    * https://github.com/sass/libsass/blob/0e6b4a2850092356aa3ece07c6b249f0221caced/functions.cpp#L209
+    */
+   mix: function(mixinColor, weight) {
+      var color1 = this;
+      var color2 = mixinColor;
+      var p = weight !== undefined ? weight : 0.5;
 
-      // algorithm from Sass's mix(). Ratio of first color in mix is
-      // determined by the alphas of both colors and the weight
-      var t1 = weight * 2 - 1,
-          d = this.alpha() - color2.alpha();
+      var w = 2 * p - 1;
+      var a = color1.alpha() - color2.alpha();
 
-      var weight1 = (((t1 * d == -1) ? t1 : (t1 + d) / (1 + t1 * d)) + 1) / 2;
-      var weight2 = 1 - weight1;
+      var w1 = (((w * a == -1) ? w : (w + a)/(1 + w*a)) + 1) / 2.0;
+      var w2 = 1 - w1;
 
-      var rgb = this.rgbArray();
-      var rgb2 = color2.rgbArray();
-
-      for (var i = 0; i < rgb.length; i++) {
-         rgb[i] = rgb[i] * weight1 + rgb2[i] * weight2;
-      }
-      this.setValues("rgb", rgb);
-
-      var alpha = this.alpha() * weight + color2.alpha() * (1 - weight);
-      this.setValues("alpha", alpha);
-
-      return this;
+      return this
+        .rgb(
+          w1 * color1.red() + w2 * color2.red(),
+          w1 * color1.green() + w2 * color2.green(),
+          w1 * color1.blue() + w2 * color2.blue()
+        )
+        .alpha(color1.alpha() * p + color2.alpha() * (1 - p));
    },
 
    toJSON: function() {
@@ -1586,7 +1587,7 @@ Color.prototype = {
 Color.prototype.getValues = function(space) {
    var vals = {};
    for (var i = 0; i < space.length; i++) {
-      vals[space[i]] = this.values[space][i];
+      vals[space.charAt(i)] = this.values[space][i];
    }
    if (this.values.alpha != 1) {
       vals["a"] = this.values.alpha;
@@ -1621,10 +1622,10 @@ Color.prototype.setValues = function(space, vals) {
       this.values[space] = vals.slice(0, space.length);
       alpha = vals[space.length];
    }
-   else if (vals[space[0]] !== undefined) {
+   else if (vals[space.charAt(0)] !== undefined) {
       // {r: 10, g: 10, b: 10}
       for (var i = 0; i < space.length; i++) {
-        this.values[space][i] = vals[space[i]];
+        this.values[space][i] = vals[space.charAt(i)];
       }
       alpha = vals.a;
    }
