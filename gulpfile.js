@@ -7,7 +7,7 @@ var source = require('vinyl-source-stream');
 var gutil = require('gulp-util');
 
 var opts = watchify.args;
-opts.entries = ['./main.js'];
+opts.entries = ['./js/main.js'];
 
 var b = watchify(browserify(opts)); 
 
@@ -19,5 +19,5 @@ function bundle() {
 	return b.bundle()
 		.on('error', gutil.log.bind(gutil, 'Browserify Error'))
 		.pipe(source('bundle.js'))
-		.pipe(gulp.dest('./'));
+		.pipe(gulp.dest('./dist'));
 }
